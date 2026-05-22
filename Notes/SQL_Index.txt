@@ -1,0 +1,183 @@
+Index:
+DataStructure provides quick access to data,optimizing the speed of your query.
+
+We have different indexes in databases for different purposes.
+
+Some indexes are better for reading and others for writing performance.
+
+Indexes are of three categories:
+
+1) Structure 
+--> Clustered Index.
+--> Non-Clustered Index.
+
+2) Storage
+--> RowStore_Index.
+--> Columnstore_Index.
+
+3) Function
+--> Unique_Index.
+--> Filtered_Index.
+
+------>> What happens to the database table if you donot use Index??
+
+Without indexes, the database performs a full table scan, checking every row which makes queries slow. Indexes improve performance by allowing direct access to data, but too many indexes can slow down write operations.(SQL will do the FULL TABLE SCAN)
+
+------>> What is a Heap Structure ??
+
+A heap is a table without a clustered index where data is stored in an unordered way. It allows fast inserts but slower reads because the database has to scan the entire table.
+
+------>> What is a Page ??
+
+The smallest unit of data storage in a database.(8kb)
+It stores anything(MetaData,Data,Indexes etc)
+
+Pages are of 2 types:
+Data Page.
+Index Page.
+
+--------------------------------------- CLUSTERED INDEX ---------------------------------
+
+🔹 Basic Idea
+A clustered index stores the actual table data in sorted order.
+The table itself becomes organized based on one column.
+
+🔹 How it Works (Step-by-step)
+First, SQL Server sorts the data based on the clustered index column.
+Then it builds a B-Tree structure on that sorted data.
+The leaf nodes of the B-Tree contain the actual data rows (not pointers).
+
+👉 Important line (write this ⭐):
+“Clustered index = Sorted data + B-Tree structure where leaf nodes store actual data.”
+
+🔹 Structure (B-Tree)
+Root Node → Starting point
+Intermediate Nodes → Help to navigate
+Leaf Nodes → Contain actual table data
+
+🔹 Key Properties
+Only ONE clustered index per table
+Data is stored in sorted (physical) order
+
+Very fast for:
+WHERE
+BETWEEN
+ORDER BY
+No extra lookup needed (data is already there)
+
+🔹 Advantages
+Fast data retrieval ⚡
+Efficient for range queries
+Reduces disk reads
+
+🔹 Disadvantages
+Slow inserts if data is not in order
+Can cause page splits
+Only one clustered index allowed
+
+🔹 Example
+PRIMARY KEY (id)
+
+👉 By default creates a clustered index
+
+"IN CLUSTERED INDEX WE HAVE POINTER TO EACH CLUSTER BUT IN NON-CLUSTERED INDEX WE HAVE POINTER TO EACH ID"
+
+--------------------------------------- NON CLUSTERED INDEX ------------------------------
+
+A non-clustered index will not reorganize or change anything on the data page and SQL start immediately the B-TREE structure.
+
+"IN NON-CLUSTERED INDEX OUR LEAF NODE HAVE INDEX PAGE AND DATA PAGES ARE NOT THE PART OF THE B-TREE"
+
+"IN NON-CLUSTERED INDEX B-TREE IS JUST A SEPARATE STRUCTURE THAT DOESNOT INVOLVE ANY DATA"
+
+🔹 Basic Idea
+A non-clustered index is a separate structure from the table.
+It stores index key + pointer to actual data.
+
+👉 Table data itself is NOT sorted
+
+🔹 How it Works (Step-by-step)
+SQL Server creates a separate index structure (not the table).
+It sorts the index values (not the actual data).
+It builds a B-Tree on index values.
+The leaf nodes store pointers to actual data rows.
+
+👉 Important line (write this ⭐):
+“Non-clustered index = Separate B-Tree structure where leaf nodes store pointers to actual data.”
+
+🔹 Structure (B-Tree)
+Root Node → Entry point
+Intermediate Nodes → Navigation
+Leaf Nodes → Contain:
+	Indexed column value
+	Pointer (Row ID or Clustered Key)
+
+👉 Index → finds value → then jumps to actual table
+
+🔹 Key Properties
+You can have multiple non-clustered indexes
+Does NOT change table order
+Requires extra lookup to fetch full data
+
+🔹 Types of Lookup
+RID Lookup → if table is Heap
+Key Lookup → if table has clustered index
+
+🔹 Advantages
+Improves search on non-primary columns
+Multiple indexes allowed
+Flexible for different queries
+
+🔹 Disadvantages
+Extra step → slightly slower than clustered
+Takes extra storage
+Slows down INSERT/UPDATE/DELETE
+
+🔹 Example
+CREATE INDEX idx_name ON students(name);
+
+---------------------------------------- CLUSTERED VS NON CLUSTERED INDEX
+
+CLUSTERED INDEX:
+
+1) DEFINITION:
+physically sorts and store rows.
+
+2) Number Of Indexes:
+One Index per Table.
+
+3) Read Performance:
+Faster.
+
+4) Write Performance:
+Slower,due to potential data row reordering.
+
+5) Storage Efficiency:
+More storage-efficient.
+
+6) Use Case:
+--> Unique Column
+--> Not Frequently modified column.
+--> Improve range query performance.
+
+
+NON-CLUSTERED INDEX:
+
+1) DEFINITION:
+Separate structure with pointers to the data.
+
+2) Number Of Indexes:
+Multiple Indexes are allowed.
+
+3) Read Performance:
+Slower.
+
+4) Write Performance:
+Faster,since physical data order is unaffected.
+
+5) Storage Efficiency:
+Requires additional storage space.
+
+6) Use Case:
+--> Columns frequently used in searc conditions and joins.
+--> Exact match queries.
